@@ -1,0 +1,19 @@
+CREATE TABLE avro_table
+     ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'
+     STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'
+     OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat' 
+     TBLPROPERTIES (
+         'avro.schema.literal'='{
+           "namespace": "abc",
+           "name": "student_marks",
+           "type": "record",
+          "fields": [ { "name":"student_name","type":"string"}, { "name":"subject","type":"string"}, { "name":"marks","type":"int"}]
+         }');
+--------------------------------------------------------------
+load data local inpath '/home/mercy/Downloads/hive/student.avro' into table avro_tables;
+Table default.avro_tables stats: [numFiles=1, totalSize=324]
+OK
+Time taken: 0.301 seconds
+-------------------------------------------------------------------------------------------------------------
+insert overwrite local directory 'file:///home/amirtha/Desktop/HiveDemos/AvroFiles' row format delimited fields terminated by '#' select * from avro_tables;
+

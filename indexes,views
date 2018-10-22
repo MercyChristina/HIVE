@@ -1,0 +1,96 @@
+use niit;
+
+create index prof_index on table customer(profession) as 'compact' with deferred rebuild;
+OK
+Time taken: 1.875 seconds
+---------------------------------------------------------------------------------
+alter index prof_index on customer rebuild;
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 7.32 sec   HDFS Read: 400897 HDFS Write: 71483 SUCCESS
+Total MapReduce CPU Time Spent: 7 seconds 320 msec
+OK
+Time taken: 29.571 seconds
+-----------------------------------------------------------------------------------------------
+show indexes on customer;prof_index          	customer            	profession          	niit__customer_prof_index__	compact             	
+Time taken: 0.141 seconds, Fetched: 1 row(s)
+----------------------------------------------------------------------------------------------------
+describe niit__customer_prof_index__;
+OK
+profession          	string              	                    
+_bucketname         	string              	                    
+_offsets            	array<bigint>       	                    
+Time taken: 0.175 seconds, Fetched: 3 row(s)
+---------------------------------------------------------------------------------
+select * from retail__customer_prof_index__ where profession = "Pilot;
+Pilot	hdfs://localhost:54310/user/hive/warehouse/niit.db/customer/custs.txt	
+4000001,Kristina,Chung,55,Pilot
+4000002,Paige,Chen,74,Teacher
+4000003,Sherri,Melton,34,Firefighter
+4000004,Gretchen,Hill,66,Computer hardware engineer
+4000005,Karen,Puckett,74,Lawyer
+4000006,Patrick,Song,42,Veterinarian
+4000007,Elsie,Hamilton,43,Pilot
+4000008,Hazel,Bender,63,Carpenter
+4000009,Malcolm,Wagner,39,Artist
+ Time taken: 0.247 seconds, Fetched: 1 row(s)
+------------------------------------------------------------------------
+select profession, count(*) from customer group by profession;
+Physicist	201
+Pilot	209
+Police officer	209
+Politician	227
+Psychologist	194
+Real estate agent	191
+Recreation and fitness worker	210
+Reporter	199
+Secretary	200
+Social worker	212
+Statistician	196
+Teacher	189
+Therapist	187
+Veterinarian	208
+Writer	95
+Time taken: 66.341 seconds, Fetched: 51 row(s)
+---------------------------------------------------------------------------------------
+CREATE VIEW age_45pluss AS
+    > SELECT * FROM customer
+    > WHERE age>45; 
+OK
+Time taken: 0.122 seconds
+---------------------------------------------------------------------------------
+select * from age_45plus; 
+4009980	Erica	Moore	47	Artist
+4009981	Clarence	Berry	64	Pharmacist
+4009985	Rachel	Corbett	66	Human resources assistant
+4009986	Jesse	Smith	57	Designer
+4009991	Paul	Mullins	47	Reporter
+4009993	Becky	Wolfe	67	Musician
+4009996	Tonya	McIntosh	56	Engineering technician
+4009998	Tracey	Bullock	60	Computer hardware engineer
+4009999	Ray	Hewitt	64	Carpenter
+Time taken: 0.118 seconds, Fetched: 5354 row(s)
+------------------------------------------------------------------------------------------------------------------
+create a file custs1 on local file system
+5000000,Mike,Smith,46,Pilot 
+hduser@ubuntu:hadoop fs -mkdir /customer
+18/10/22 04:11:51 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+hduser@ubuntu:~$ hadoop fs -put file:///home/mercy/Videos/custs1 /customer
+18/10/22 04:12:14 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+------------------------------------------------------------------------------------------------------------------------
+select * from age_45plus;
+4009991	Paul	Mullins	47	Reporter
+4009993	Becky	Wolfe	67	Musician
+4009996	Tonya	McIntosh	56	Engineering technician
+4009998	Tracey	Bullock	60	Computer hardware engineer
+4009999	Ray	Hewitt	64	Carpenter
+Time taken: 0.203 seconds, Fetched: 5354 row(s)
+--------------------------------------------
+CREATE VIEW topten AS
+select a.custno, b.firstname,b.lastname, b.age, b.profession, round(sum(a.amount),2) as amt from txnrecords a, customer b where a.custno=b.custno group by a.custno, b.firstname, b.lastname, b.age, b.profession order by amt desc limit 10;
+ 
+select * from topten;
+4009485	Stuart	House	58	Teacher	1973.3
+4006425	Joe	Burns	30	Economist	1732.09
+4000221	Glenda	Boswell	28	Civil engineer	1671.47
+4003228	Elsie	Newton	54	Accountant	1640.63
+4006606	Jackie	Lewis	66	Recreation and fitness worker	1628.94
+

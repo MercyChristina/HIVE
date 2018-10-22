@@ -1,0 +1,93 @@
+create database complexs;
+use complexs;
+create table tab8(id int,name string,sal bigint,sub array<string>,city string) row format delimited fields terminated by ',' collection items terminated by '$';
+OK
+Time taken: 0.175 seconds
+--------------------------------------------------------------------------
+load data local inpath '/home/mercy/Downloads/hive/arrayfile.txt' overwrite into table tab8;
+Loading data to table complexs.tab8
+Table complexs.tab8 stats: [numFiles=1, numRows=0, totalSize=45, rawDataSize=0]
+OK
+Time taken: 0.467 seconds
+------------------------------------------------------------------------------------------------
+select * from tab8;
+OK
+1	abc	40000	["a","b","c"]	city1
+2	def	3000	["d","f"]	city2
+Time taken: 0.751 seconds, Fetched: 2 row(s)
+---------------------------------------------------------------------------------
+select * from tab8 where id=1;
+OK
+1	abc	40000	["a","b","c"]	city1
+Time taken: 0.134 seconds, Fetched: 1 row(s)
+-----------------------------------------------------------------------
+select id, name, sal, sub[2] from tab8;
+OK
+1	abc	40000	c
+2	def	3000	NULL
+Time taken: 0.617 seconds, Fetched: 2 row(s)
+-----------------------------------------------------------------------------
+create table tab11(id int,name string,sal bigint,sub array<string>,dud map<string,int>,city string)
+row format delimited 
+fields terminated by ','
+collection items terminated by '$'
+map keys terminated by '#';
+OK
+Time taken: 0.129 seconds
+---------------------------------------------------------------------
+load data local inpath '/home/mercy/Downloads/hive/mapfile.txt' overwrite into table tab11;
+Loading data to table complexs.tab11
+Table complexs.tab11 stats: [numFiles=1, numRows=0, totalSize=79, rawDataSize=0]
+OK
+Time taken: 0.428 seconds
+---------------------------------------------------------------------------------
+ select * from tab11;
+OK
+1	abc	40000	["a","b","c"]	{"bonus":500,"insurance":200}	city1
+2	def	3000	["d","f"]	{"bonus":500}	city2
+Time taken: 0.139 seconds, Fetched: 2 row(s)
+--------------------------------------------------------------------------------------------------------
+select dud["pf"] from tab11; 
+OK
+NULL
+NULL
+Time taken: 0.152 seconds, Fetched: 2 row(s)
+--------------------------------------------------------------------
+select dud["pf"],dud["epf"] from tab11; 
+OK
+NULL	NULL
+NULL	NULL
+Time taken: 0.143 seconds, Fetched: 2 row(s)
+----------------------------------------------------------------------------------------------
+create table tab12(id int,name string,sal bigint,sub array<string>,dud map<string,int>,addr struct<city:string,state:string,pin:bigint>)
+row format delimited 
+fields terminated by ','
+collection items terminated by '$'
+map keys terminated by '#';
+OK
+Time taken: 0.128 seconds
+-------------------------------------------------------------------------------
+load data local inpath '/home/mercy/Downloads/hive/structfile.txt' into table tab12;
+Loading data to table complexs.tab12
+Table complexs.tab12 stats: [numFiles=1, totalSize=101]
+OK
+Time taken: 0.294 seconds
+----------------------------------------------------------------------------
+select addr.city from tab12;
+OK
+city1
+city2
+Time taken: 0.134 seconds, Fetched: 2 row(s)
+-------------------------------------------------------------------------
+import org.apache.hadoop.hive.ql.exec.UDF;
+
+
+public class helloupper extends UDF{
+	public String evaluate(String s){
+		String name="Hello:"+ s.toUpperCase();
+		return name;
+	}
+
+}
+
+
